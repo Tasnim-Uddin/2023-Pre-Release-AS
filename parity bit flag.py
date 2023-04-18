@@ -227,7 +227,7 @@ def ConvertToBinary(DecimalNumber):
         Bit = str(Remainder)
         BinaryString = Bit + BinaryString
         DecimalNumber = DecimalNumber // 2
-    while len(BinaryString) < 3:
+    while len(BinaryString) < 4:
         BinaryString = '0' + BinaryString
     return BinaryString
 
@@ -252,20 +252,25 @@ def DisplayCurrentState(SourceCode, Memory, Registers):
     DisplayCode(SourceCode, Memory)
     print("*")
     print("*  PC: ", Registers[PC], " ACC: ", Registers[ACC], " TOS: ", Registers[TOS])
-    print("*  Status Register: ZNV")
+    print("*  Status Register: ZNVP")
     print("*                  ", ConvertToBinary(Registers[STATUS]))
     DisplayFrameDelimiter(-1)
 
 
 def SetFlags(Value, Registers):
-    if Value == 0:
-        Registers[STATUS] = ConvertToDecimal("100")
-    elif Value < 0:
-        Registers[STATUS] = ConvertToDecimal("010")
-    elif Value > MAX_INT or Value < -(MAX_INT + 1):
-        Registers[STATUS] = ConvertToDecimal("001")
+    # even parity
+    if ConvertToBinary(Registers[ACC]).count("1") % 2 == 0:
+        parity_bit = "1"
     else:
-        Registers[STATUS] = ConvertToDecimal("000")
+        parity_bit = "0"
+    if Value == 0:
+        Registers[STATUS] = ConvertToDecimal("100" + parity_bit)
+    elif Value < 0:
+        Registers[STATUS] = ConvertToDecimal("010" + parity_bit)
+    elif Value > MAX_INT or Value < -(MAX_INT + 1):
+        Registers[STATUS] = ConvertToDecimal("001" + parity_bit)
+    else:
+        Registers[STATUS] = ConvertToDecimal("000" + parity_bit)
     return Registers
 
 
@@ -295,7 +300,7 @@ def ExecuteLDAimm(Registers, Operand):
 def ExecuteADD(Memory, Registers, Address):
     Registers[ACC] = Registers[ACC] + Memory[Address].OperandValue
     Registers = SetFlags(Registers[ACC], Registers)
-    if Registers[STATUS] == ConvertToDecimal("001"):
+    if Registers[STATUS] == ConvertToDecimal("0010") or Registers[STATUS] == ConvertToDecimal("0011"):
         ReportRunTimeError("Overflow", Registers)
     return Registers
 
@@ -303,7 +308,7 @@ def ExecuteADD(Memory, Registers, Address):
 def ExecuteSUB(Memory, Registers, Address):
     Registers[ACC] = Registers[ACC] - Memory[Address].OperandValue
     Registers = SetFlags(Registers[ACC], Registers)
-    if Registers[STATUS] == ConvertToDecimal("001"):
+    if Registers[STATUS] == ConvertToDecimal("0010") or Registers[STATUS] == ConvertToDecimal("0011"):
         ReportRunTimeError("Overflow", Registers)
     return Registers
 

@@ -365,6 +365,9 @@ def Execute(SourceCode, Memory):
     DisplayCurrentState(SourceCode, Memory, Registers)
     OpCode = Memory[Registers[PC]].OpCode
     while OpCode != "HLT":
+        if int(SourceCode[0]) == Registers[TOS]:
+            print("Overflow error")
+            break
         FrameNumber += 1
         print()
         DisplayFrameDelimiter(FrameNumber)
@@ -398,6 +401,8 @@ def Execute(SourceCode, Memory):
             DisplayCurrentState(SourceCode, Memory, Registers)
         else:
             OpCode = "HLT"
+        print(Registers)
+        print(SourceCode)
     print("Execution terminated")
 
 
