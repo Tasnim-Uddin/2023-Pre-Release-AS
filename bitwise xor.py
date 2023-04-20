@@ -313,6 +313,7 @@ def ExecuteXOR(Memory, Registers, Address):
     Registers = SetFlags(Registers[ACC], Registers)
     return Registers
 
+
 def ExecuteXORimm(Registers, Operand):
     Registers[ACC] = Registers[ACC] ^ Operand
     Registers = SetFlags(Registers[ACC], Registers)

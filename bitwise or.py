@@ -130,7 +130,7 @@ def ExtractLabel(Instruction, LineNumber, Memory, SymbolTable):
 
 def ExtractOpCode(Instruction, LineNumber, Memory):
     if len(Instruction) > 9:
-        OpCodeValues = ["LDA", "STA", "LDA#", "HLT", "ADD", "JMP", "SUB", "CMP#", "OR ", "OR #", "BEQ", "SKP", "JSR", "RTN", "   "]
+        OpCodeValues = ["LDA", "STA", "LDA#", "HLT", "ADD", "JMP", "SUB", "CMP#", "ORR", "ORR#", "BEQ", "SKP", "JSR", "RTN", "   "]
         Operation = Instruction[7:10]
         if len(Instruction) > 10:
             AddressMode = Instruction[10:11]
@@ -308,12 +308,13 @@ def ExecuteSUB(Memory, Registers, Address):
     return Registers
 
 
-def ExecuteOR(Memory, Registers, Address):
+def ExecuteORR(Memory, Registers, Address):
     Registers[ACC] = Registers[ACC] | Memory[Address].OperandValue
     Registers = SetFlags(Registers[ACC], Registers)
     return Registers
 
-def ExecuteORimm(Registers, Operand):
+
+def ExecuteORRimm(Registers, Operand):
     Registers[ACC] = Registers[ACC] | Operand
     Registers = SetFlags(Registers[ACC], Registers)
     return Registers
@@ -400,10 +401,10 @@ def Execute(SourceCode, Memory):
             Registers = ExecuteBEQ(Registers, Operand)
         elif OpCode == "SUB":
             Registers = ExecuteSUB(Memory, Registers, Operand)
-        elif OpCode == "OR ":
-            Registers = ExecuteOR(Memory, Registers, Operand)
-        elif OpCode == "OR #":
-            Registers = ExecuteORimm(Registers, Operand)
+        elif OpCode == "OR":
+            Registers = ExecuteORR(Memory, Registers, Operand)
+        elif OpCode == "ORR#":
+            Registers = ExecuteORRimm(Registers, Operand)
         elif OpCode == "SKP":
             ExecuteSKP()
         elif OpCode == "RTN":

@@ -130,7 +130,7 @@ def ExtractLabel(Instruction, LineNumber, Memory, SymbolTable):
 
 def ExtractOpCode(Instruction, LineNumber, Memory):
     if len(Instruction) > 9:
-        OpCodeValues = ["LDA", "STA", "LDA#", "HLT", "ADD", "JMP", "SUB", "CMP#", "BEQ", "SKP", "JSR", "RTN", "   "]
+        OpCodeValues = ["LDA", "STA", "LDA#", "HLT", "ADD", "JMP", "SUB", "LSL", "CMP#", "BEQ", "SKP", "JSR", "RTN", "   "]
         Operation = Instruction[7:10]
         if len(Instruction) > 10:
             AddressMode = Instruction[10:11]
@@ -308,6 +308,10 @@ def ExecuteSUB(Memory, Registers, Address):
     return Registers
 
 
+def ExecuteLSL(Memory, Registers, Address):
+    Registers[ACC] = Registers[ACC] * Memory[Address].OperandValue
+
+
 def ExecuteCMPimm(Registers, Operand):
     Value = Registers[ACC] - Operand
     Registers = SetFlags(Value, Registers)
@@ -365,9 +369,6 @@ def Execute(SourceCode, Memory):
     DisplayCurrentState(SourceCode, Memory, Registers)
     OpCode = Memory[Registers[PC]].OpCode
     while OpCode != "HLT":
-        if int(SourceCode[0]) == Registers[TOS]:
-            print("Overflow error")
-            break
         FrameNumber += 1
         print()
         DisplayFrameDelimiter(FrameNumber)
@@ -392,6 +393,8 @@ def Execute(SourceCode, Memory):
             Registers = ExecuteBEQ(Registers, Operand)
         elif OpCode == "SUB":
             Registers = ExecuteSUB(Memory, Registers, Operand)
+        elif OpCode == "LSL":
+            Registers = ExecuteLSL(Memory, Registers, Operand)
         elif OpCode == "SKP":
             ExecuteSKP()
         elif OpCode == "RTN":
@@ -401,8 +404,6 @@ def Execute(SourceCode, Memory):
             DisplayCurrentState(SourceCode, Memory, Registers)
         else:
             OpCode = "HLT"
-        print(Registers)
-        print(SourceCode)
     print("Execution terminated")
 
 

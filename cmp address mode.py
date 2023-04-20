@@ -130,7 +130,7 @@ def ExtractLabel(Instruction, LineNumber, Memory, SymbolTable):
 
 def ExtractOpCode(Instruction, LineNumber, Memory):
     if len(Instruction) > 9:
-        OpCodeValues = ["LDA", "STA", "LDA#", "HLT", "ADD", "JMP", "SUB", "CMP#", "BEQ", "SKP", "JSR", "RTN", "   "]
+        OpCodeValues = ["LDA", "STA", "LDA#", "HLT", "ADD", "JMP", "SUB", "CMP", "CMP#", "BEQ", "SKP", "JSR", "RTN", "   "]
         Operation = Instruction[7:10]
         if len(Instruction) > 10:
             AddressMode = Instruction[10:11]
@@ -308,6 +308,12 @@ def ExecuteSUB(Memory, Registers, Address):
     return Registers
 
 
+def ExecuteCMP(Memory, Registers, Address):
+    Value = Registers[ACC] - Memory[Address].OperandValue
+    Registers = SetFlags(Value, Registers)
+    return Registers
+
+
 def ExecuteCMPimm(Registers, Operand):
     Value = Registers[ACC] - Operand
     Registers = SetFlags(Value, Registers)
@@ -365,9 +371,6 @@ def Execute(SourceCode, Memory):
     DisplayCurrentState(SourceCode, Memory, Registers)
     OpCode = Memory[Registers[PC]].OpCode
     while OpCode != "HLT":
-        if int(SourceCode[0]) == Registers[TOS]:
-            print("Overflow error")
-            break
         FrameNumber += 1
         print()
         DisplayFrameDelimiter(FrameNumber)
@@ -386,6 +389,8 @@ def Execute(SourceCode, Memory):
             Registers = ExecuteJMP(Registers, Operand)
         elif OpCode == "JSR":
             Memory, Registers = ExecuteJSR(Memory, Registers, Operand)
+        elif OpCode == "CMP":
+            Registers = ExecuteCMP(Memory, Registers, Operand)
         elif OpCode == "CMP#":
             Registers = ExecuteCMPimm(Registers, Operand)
         elif OpCode == "BEQ":
@@ -401,8 +406,6 @@ def Execute(SourceCode, Memory):
             DisplayCurrentState(SourceCode, Memory, Registers)
         else:
             OpCode = "HLT"
-        print(Registers)
-        print(SourceCode)
     print("Execution terminated")
 
 

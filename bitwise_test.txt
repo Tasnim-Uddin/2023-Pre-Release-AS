@@ -1,7 +1,7 @@
        LDA  NUM1
-       XOR  NUM2
-       XOR# 17
+       ADD  NUM2
+       ADD# 10
        HLT
 
- NUM1:      52
- NUM2:      69
+ NUM1:      4
+ NUM2:      5

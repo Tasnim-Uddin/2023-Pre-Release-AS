@@ -307,6 +307,7 @@ def ExecuteSUB(Memory, Registers, Address):
         ReportRunTimeError("Overflow", Registers)
     return Registers
 
+
 def ExecuteAND(Memory, Registers, Address):
     Registers[ACC] = Registers[ACC] & Memory[Address].OperandValue
     Registers = SetFlags(Registers[ACC], Registers)

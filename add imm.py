@@ -130,7 +130,7 @@ def ExtractLabel(Instruction, LineNumber, Memory, SymbolTable):
 
 def ExtractOpCode(Instruction, LineNumber, Memory):
     if len(Instruction) > 9:
-        OpCodeValues = ["LDA", "STA", "LDA#", "HLT", "ADD", "JMP", "SUB", "CMP#", "BEQ", "SKP", "JSR", "RTN", "   "]
+        OpCodeValues = ["LDA", "STA", "LDA#", "HLT", "ADD", "ADD#", "JMP", "SUB", "CMP#", "BEQ", "SKP", "JSR", "RTN", "   "]
         Operation = Instruction[7:10]
         if len(Instruction) > 10:
             AddressMode = Instruction[10:11]
@@ -300,6 +300,14 @@ def ExecuteADD(Memory, Registers, Address):
     return Registers
 
 
+def ExecuteADDimm(Registers, Operand):
+    Registers[ACC] = Registers[ACC] + Operand
+    Registers = SetFlags(Registers[ACC], Registers)
+    if Registers[STATUS] == ConvertToDecimal("001"):
+        ReportRunTimeError("Overflow", Registers)
+    return Registers
+
+
 def ExecuteSUB(Memory, Registers, Address):
     Registers[ACC] = Registers[ACC] - Memory[Address].OperandValue
     Registers = SetFlags(Registers[ACC], Registers)
@@ -365,9 +373,6 @@ def Execute(SourceCode, Memory):
     DisplayCurrentState(SourceCode, Memory, Registers)
     OpCode = Memory[Registers[PC]].OpCode
     while OpCode != "HLT":
-        if int(SourceCode[0]) == Registers[TOS]:
-            print("Overflow error")
-            break
         FrameNumber += 1
         print()
         DisplayFrameDelimiter(FrameNumber)
@@ -382,6 +387,8 @@ def Execute(SourceCode, Memory):
             Registers = ExecuteLDAimm(Registers, Operand)
         elif OpCode == "ADD":
             Registers = ExecuteADD(Memory, Registers, Operand)
+        elif OpCode == "ADD#":
+            Registers = ExecuteADDimm(Registers, Operand)
         elif OpCode == "JMP":
             Registers = ExecuteJMP(Registers, Operand)
         elif OpCode == "JSR":
@@ -401,8 +408,6 @@ def Execute(SourceCode, Memory):
             DisplayCurrentState(SourceCode, Memory, Registers)
         else:
             OpCode = "HLT"
-        print(Registers)
-        print(SourceCode)
     print("Execution terminated")
 
 
