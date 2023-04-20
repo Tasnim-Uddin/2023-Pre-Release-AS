@@ -1,6 +1,6 @@
        LDA  NUM1
-       OR   NUM2
-       OR#  17
+       XOR  NUM2
+       XOR# 17
        HLT
 
  NUM1:      52

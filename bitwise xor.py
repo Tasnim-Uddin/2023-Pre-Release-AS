@@ -130,7 +130,7 @@ def ExtractLabel(Instruction, LineNumber, Memory, SymbolTable):
 
 def ExtractOpCode(Instruction, LineNumber, Memory):
     if len(Instruction) > 9:
-        OpCodeValues = ["LDA", "STA", "LDA#", "HLT", "ADD", "JMP", "SUB", "CMP#", "ODD", "ODD#", "BEQ", "SKP", "JSR", "RTN", "   "]
+        OpCodeValues = ["LDA", "STA", "LDA#", "HLT", "ADD", "JMP", "SUB", "CMP#", "XOR", "XOR#", "BEQ", "SKP", "JSR", "RTN", "   "]
         Operation = Instruction[7:10]
         if len(Instruction) > 10:
             AddressMode = Instruction[10:11]
@@ -309,12 +309,12 @@ def ExecuteSUB(Memory, Registers, Address):
 
 
 def ExecuteXOR(Memory, Registers, Address):
-
+    Registers[ACC] = Registers[ACC] ^ Memory[Address].OperandValue
     Registers = SetFlags(Registers[ACC], Registers)
     return Registers
 
 def ExecuteXORimm(Registers, Operand):
-
+    Registers[ACC] = Registers[ACC] ^ Operand
     Registers = SetFlags(Registers[ACC], Registers)
     return Registers
 

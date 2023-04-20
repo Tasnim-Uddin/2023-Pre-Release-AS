@@ -130,7 +130,7 @@ def ExtractLabel(Instruction, LineNumber, Memory, SymbolTable):
 
 def ExtractOpCode(Instruction, LineNumber, Memory):
     if len(Instruction) > 9:
-        OpCodeValues = ["LDA", "STA", "LDA#", "HLT", "ADD", "JMP", "SUB", "CMP#", "OR", "OR#", "BEQ", "SKP", "JSR", "RTN", "   "]
+        OpCodeValues = ["LDA", "STA", "LDA#", "HLT", "ADD", "JMP", "SUB", "CMP#", "OR ", "OR #", "BEQ", "SKP", "JSR", "RTN", "   "]
         Operation = Instruction[7:10]
         if len(Instruction) > 10:
             AddressMode = Instruction[10:11]
@@ -400,9 +400,9 @@ def Execute(SourceCode, Memory):
             Registers = ExecuteBEQ(Registers, Operand)
         elif OpCode == "SUB":
             Registers = ExecuteSUB(Memory, Registers, Operand)
-        elif OpCode == "OR":
+        elif OpCode == "OR ":
             Registers = ExecuteOR(Memory, Registers, Operand)
-        elif OpCode == "OR#":
+        elif OpCode == "OR #":
             Registers = ExecuteORimm(Registers, Operand)
         elif OpCode == "SKP":
             ExecuteSKP()

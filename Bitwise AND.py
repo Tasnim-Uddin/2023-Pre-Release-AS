@@ -130,7 +130,7 @@ def ExtractLabel(Instruction, LineNumber, Memory, SymbolTable):
 
 def ExtractOpCode(Instruction, LineNumber, Memory):
     if len(Instruction) > 9:
-        OpCodeValues = ["LDA", "STA", "LDA#", "HLT", "ADD", "JMP", "SUB", "CMP#", "BEQ", "SKP", "JSR", "RTN", "   "]
+        OpCodeValues = ["LDA", "STA", "LDA#", "HLT", "ADD", "JMP", "SUB", "CMP#", "AND", "AND#", "BEQ", "SKP", "JSR", "RTN", "   "]
         Operation = Instruction[7:10]
         if len(Instruction) > 10:
             AddressMode = Instruction[10:11]
@@ -307,6 +307,17 @@ def ExecuteSUB(Memory, Registers, Address):
         ReportRunTimeError("Overflow", Registers)
     return Registers
 
+def ExecuteAND(Memory, Registers, Address):
+    Registers[ACC] = Registers[ACC] & Memory[Address].OperandValue
+    Registers = SetFlags(Registers[ACC], Registers)
+    return Registers
+
+
+def ExecuteANDimm(Registers, Operand):
+    Registers[ACC] = Registers[ACC] & Operand
+    Registers = SetFlags(Registers[ACC], Registers)
+    return Registers
+
 
 def ExecuteCMPimm(Registers, Operand):
     Value = Registers[ACC] - Operand
@@ -329,26 +340,6 @@ def ExecuteJMP(Registers, Address):
 
 def ExecuteSKP():
     return
-
-
-def ExecuteAND(Memory, Registers, Address):
-    result = ""
-    Value1 = ConvertToBinary(Memory[Address].OperandValue)
-    if len(Value1) < 8:
-        for i in range(0, len(Value1) - 8):
-            Value1 = "0" + Value1
-    if len(Value1) > 8:
-
-    Value2 = ConvertToBinary(Registers[ACC])
-    for i in range(0, 8):
-        if Value1[i] == Value2[i]:
-            result += "1"
-        else:
-            result += "0"
-    print(Value1)
-    print(Value2)
-    Registers[ACC] = ConvertToDecimal(result)
-    return Registers
 
 
 def DisplayStack(Memory, Registers):
@@ -409,10 +400,12 @@ def Execute(SourceCode, Memory):
             Registers = ExecuteBEQ(Registers, Operand)
         elif OpCode == "SUB":
             Registers = ExecuteSUB(Memory, Registers, Operand)
-        elif OpCode == "SKP":
-            ExecuteSKP()
         elif OpCode == "AND":
             Registers = ExecuteAND(Memory, Registers, Operand)
+        elif OpCode == "AND#":
+            Registers = ExecuteANDimm(Registers, Operand)
+        elif OpCode == "SKP":
+            ExecuteSKP()
         elif OpCode == "RTN":
             Registers = ExecuteRTN(Memory, Registers)
         if Registers[ERR] == 0:
@@ -420,7 +413,6 @@ def Execute(SourceCode, Memory):
             DisplayCurrentState(SourceCode, Memory, Registers)
         else:
             OpCode = "HLT"
-    print(ExecuteAND(Memory, Registers, Operand))
     print("Execution terminated")
 
 

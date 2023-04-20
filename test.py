@@ -1,4 +1,4 @@
-def bitwise_and(a, b):
-    return (a | b)
+def bitwise(a, b):
+    return (a ^ b)
 
-print(bitwise_and(156, 52))
+print(bitwise(52, 69))
