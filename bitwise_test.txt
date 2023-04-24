@@ -1,7 +1,6 @@
        LDA  NUM1
-       ADD  NUM2
-       ADD# 10
+       LSR  NUM2
        HLT
 
- NUM1:      4
+ NUM1:      128
  NUM2:      5

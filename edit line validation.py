@@ -93,6 +93,9 @@ def LoadFile(SourceCode):
 
 def EditSourceCode(SourceCode):
     LineNumber = int(input("Enter line number of code to edit: "))
+    if LineNumber > int(SourceCode[0]) or LineNumber <= 0:
+        print("Cannot edit")
+        LineNumber = int(input("Enter line number of code to edit: "))
     print(SourceCode[LineNumber])
     Choice = EMPTY_STRING
     while Choice != "C":

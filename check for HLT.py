@@ -130,7 +130,7 @@ def ExtractLabel(Instruction, LineNumber, Memory, SymbolTable):
 
 def ExtractOpCode(Instruction, LineNumber, Memory):
     if len(Instruction) > 9:
-        OpCodeValues = ["LDA", "STA", "LDA#", "HLT", "ADD", "JMP", "SUB", "LSL", "CMP#", "BEQ", "SKP", "JSR", "RTN", "   "]
+        OpCodeValues = ["LDA", "STA", "LDA#", "HLT", "ADD", "JMP", "SUB", "CMP#", "BEQ", "SKP", "JSR", "RTN", "   "]
         Operation = Instruction[7:10]
         if len(Instruction) > 10:
             AddressMode = Instruction[10:11]
@@ -308,11 +308,6 @@ def ExecuteSUB(Memory, Registers, Address):
     return Registers
 
 
-def ExecuteLSL(Memory, Registers, Address):
-    Registers[ACC] = Registers[ACC] * 2**Memory[Address].OperandValue
-    return Registers
-
-
 def ExecuteCMPimm(Registers, Operand):
     Value = Registers[ACC] - Operand
     Registers = SetFlags(Value, Registers)
@@ -360,6 +355,15 @@ def ExecuteRTN(Memory, Registers):
     return Registers
 
 
+def Check_HLT(SourceCode):
+    found_HLT = False
+    for line in SourceCode:
+        if "HLT" in line:
+            found_HLT = True
+            break
+    return found_HLT
+
+
 def Execute(SourceCode, Memory):
     Registers = [0, 0, 0, 0, 0]
     Registers = SetFlags(Registers[ACC], Registers)
@@ -369,42 +373,43 @@ def Execute(SourceCode, Memory):
     DisplayFrameDelimiter(FrameNumber)
     DisplayCurrentState(SourceCode, Memory, Registers)
     OpCode = Memory[Registers[PC]].OpCode
-    while OpCode != "HLT":
-        FrameNumber += 1
-        print()
-        DisplayFrameDelimiter(FrameNumber)
-        Operand = Memory[Registers[PC]].OperandValue
-        print("*  Current Instruction Register: ", OpCode, Operand)
-        Registers[PC] = Registers[PC] + 1
-        if OpCode == "LDA":
-            Registers = ExecuteLDA(Memory, Registers, Operand)
-        elif OpCode == "STA":
-            Memory = ExecuteSTA(Memory, Registers, Operand)
-        elif OpCode == "LDA#":
-            Registers = ExecuteLDAimm(Registers, Operand)
-        elif OpCode == "ADD":
-            Registers = ExecuteADD(Memory, Registers, Operand)
-        elif OpCode == "JMP":
-            Registers = ExecuteJMP(Registers, Operand)
-        elif OpCode == "JSR":
-            Memory, Registers = ExecuteJSR(Memory, Registers, Operand)
-        elif OpCode == "CMP#":
-            Registers = ExecuteCMPimm(Registers, Operand)
-        elif OpCode == "BEQ":
-            Registers = ExecuteBEQ(Registers, Operand)
-        elif OpCode == "SUB":
-            Registers = ExecuteSUB(Memory, Registers, Operand)
-        elif OpCode == "LSL":
-            Registers = ExecuteLSL(Memory, Registers, Operand)
-        elif OpCode == "SKP":
-            ExecuteSKP()
-        elif OpCode == "RTN":
-            Registers = ExecuteRTN(Memory, Registers)
-        if Registers[ERR] == 0:
-            OpCode = Memory[Registers[PC]].OpCode
-            DisplayCurrentState(SourceCode, Memory, Registers)
-        else:
-            OpCode = "HLT"
+    if Check_HLT(SourceCode):
+        while OpCode != "HLT":
+            FrameNumber += 1
+            print()
+            DisplayFrameDelimiter(FrameNumber)
+            Operand = Memory[Registers[PC]].OperandValue
+            print("*  Current Instruction Register: ", OpCode, Operand)
+            Registers[PC] = Registers[PC] + 1
+            if OpCode == "LDA":
+                Registers = ExecuteLDA(Memory, Registers, Operand)
+            elif OpCode == "STA":
+                Memory = ExecuteSTA(Memory, Registers, Operand)
+            elif OpCode == "LDA#":
+                Registers = ExecuteLDAimm(Registers, Operand)
+            elif OpCode == "ADD":
+                Registers = ExecuteADD(Memory, Registers, Operand)
+            elif OpCode == "JMP":
+                Registers = ExecuteJMP(Registers, Operand)
+            elif OpCode == "JSR":
+                Memory, Registers = ExecuteJSR(Memory, Registers, Operand)
+            elif OpCode == "CMP#":
+                Registers = ExecuteCMPimm(Registers, Operand)
+            elif OpCode == "BEQ":
+                Registers = ExecuteBEQ(Registers, Operand)
+            elif OpCode == "SUB":
+                Registers = ExecuteSUB(Memory, Registers, Operand)
+            elif OpCode == "SKP":
+                ExecuteSKP()
+            elif OpCode == "RTN":
+                Registers = ExecuteRTN(Memory, Registers)
+            if Registers[ERR] == 0:
+                OpCode = Memory[Registers[PC]].OpCode
+                DisplayCurrentState(SourceCode, Memory, Registers)
+            else:
+                OpCode = "HLT"
+    else:
+        print("Program will never end")
     print("Execution terminated")
 
 

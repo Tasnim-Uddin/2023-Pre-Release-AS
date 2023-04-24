@@ -30,6 +30,7 @@ def DisplayMenu():
     print("L - Load a program file")
     print("D - Display source code")
     print("E - Edit source code")
+    print("S - Save source code")
     print("A - Assemble program")
     print("R - Run the program")
     print("X - Exit simulator")
@@ -107,6 +108,17 @@ def EditSourceCode(SourceCode):
     return SourceCode
 
 
+def SaveSourceCode(SourceCode):
+    if len(SourceCode) > 1:
+        FileName = input("Enter filename to save to: ")
+        FileOut = open(FileName + ".txt", 'w')
+        for line in SourceCode[1:]:
+            FileOut.write(f"{line}\n")
+        FileOut.close()
+    else:
+        print("Cannot save file with no contents")
+
+
 def UpdateSymbolTable(SymbolTable, ThisLabel, LineNumber):
     if ThisLabel in SymbolTable:
         print("Error Code 3")
@@ -130,7 +142,7 @@ def ExtractLabel(Instruction, LineNumber, Memory, SymbolTable):
 
 def ExtractOpCode(Instruction, LineNumber, Memory):
     if len(Instruction) > 9:
-        OpCodeValues = ["LDA", "STA", "LDA#", "HLT", "ADD", "JMP", "SUB", "LSL", "CMP#", "BEQ", "SKP", "JSR", "RTN", "   "]
+        OpCodeValues = ["LDA", "STA", "LDA#", "HLT", "ADD", "JMP", "SUB", "CMP#", "BEQ", "SKP", "JSR", "RTN", "   "]
         Operation = Instruction[7:10]
         if len(Instruction) > 10:
             AddressMode = Instruction[10:11]
@@ -308,11 +320,6 @@ def ExecuteSUB(Memory, Registers, Address):
     return Registers
 
 
-def ExecuteLSL(Memory, Registers, Address):
-    Registers[ACC] = Registers[ACC] * 2**Memory[Address].OperandValue
-    return Registers
-
-
 def ExecuteCMPimm(Registers, Operand):
     Value = Registers[ACC] - Operand
     Registers = SetFlags(Value, Registers)
@@ -394,8 +401,6 @@ def Execute(SourceCode, Memory):
             Registers = ExecuteBEQ(Registers, Operand)
         elif OpCode == "SUB":
             Registers = ExecuteSUB(Memory, Registers, Operand)
-        elif OpCode == "LSL":
-            Registers = ExecuteLSL(Memory, Registers, Operand)
         elif OpCode == "SKP":
             ExecuteSKP()
         elif OpCode == "RTN":
@@ -431,6 +436,8 @@ def AssemblerSimulator():
             else:
                 SourceCode = EditSourceCode(SourceCode)
                 Memory = ResetMemory(Memory)
+        elif MenuOption == 'S':
+            SaveSourceCode(SourceCode)
         elif MenuOption == 'A':
             if SourceCode[0] == EMPTY_STRING:
                 print("Error Code 9")

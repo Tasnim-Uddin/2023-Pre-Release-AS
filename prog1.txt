@@ -7,7 +7,6 @@ WHILE: CMP# 12
        BEQ  WEND
        ADD  NUM2
        JMP  WHILE
-       SKP  
+       SKP
  WEND: STA  NUM3
        ADD  NUM4
-       HLT 
