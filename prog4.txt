@@ -1,0 +1,11 @@
+ SUB1: JSR  SUB2    * test subroutines
+       RTN
+ SUB2: JSR  SUB3
+       RTN
+ SUB3: JSR  SUB4
+       RTN
+ SUB4: JSR  SUB5
+       RTN
+ SUB5: RTN
+START: JSR  SUB1
+       HLT

@@ -1,4 +1,5 @@
 # Skeleton Program for the AQA AS Summer 2023 examination
+# Skeleton Program for the AQA AS Summer 2023 examination
 # this code should be used in conjunction with the Preliminary Material
 # written by the AQA Programmer Team
 # developed in a Python 3 environment
@@ -92,12 +93,12 @@ def LoadFile(SourceCode):
 
 
 def EditSourceCode(SourceCode):
+    Choice = EMPTY_STRING
     LineNumber = int(input("Enter line number of code to edit: "))
-    if LineNumber > int(SourceCode[0]) or LineNumber <= 0:
+    while LineNumber > int(SourceCode[0]) or LineNumber <= 0 and Choice != "C":
         print("Cannot edit")
         LineNumber = int(input("Enter line number of code to edit: "))
     print(SourceCode[LineNumber])
-    Choice = EMPTY_STRING
     while Choice != "C":
         Choice = EMPTY_STRING
         while Choice != "E" and Choice != "C":

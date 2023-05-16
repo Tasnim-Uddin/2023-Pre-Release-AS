@@ -21,7 +21,7 @@ class AssemblerInstruction:
         self.OpCode = EMPTY_STRING
         self.OperandString = EMPTY_STRING
         self.OperandValue = 0
-
+        self.StackPointerValue = 0
 
 def DisplayMenu():
     print()
@@ -341,7 +341,7 @@ def DisplayStack(Memory, Registers):
 
 def ExecuteJSR(Memory, Registers, Address):
     StackPointer = Registers[TOS] - 1
-    Memory[StackPointer].OperandValue = Registers[PC]
+    Memory[StackPointer].StackPointerValue = Registers[PC]
     Registers[PC] = Address
     Registers[TOS] = StackPointer
     DisplayStack(Memory, Registers)
@@ -351,7 +351,7 @@ def ExecuteJSR(Memory, Registers, Address):
 def ExecuteRTN(Memory, Registers):
     StackPointer = Registers[TOS]
     Registers[TOS] += 1
-    Registers[PC] = Memory[StackPointer].OperandValue
+    Registers[PC] = Memory[StackPointer].StackPointerValue
     return Registers
 
 

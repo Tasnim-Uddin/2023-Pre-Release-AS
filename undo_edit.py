@@ -30,6 +30,7 @@ def DisplayMenu():
     print("L - Load a program file")
     print("D - Display source code")
     print("E - Edit source code")
+    print("U - Undo edit to source code")
     print("A - Assemble program")
     print("R - Run the program")
     print("X - Exit simulator")
@@ -91,7 +92,7 @@ def LoadFile(SourceCode):
     return SourceCode
 
 
-def EditSourceCode(SourceCode):
+def EditSourceCode(SourceCode, AllSourceCode):
     LineNumber = int(input("Enter line number of code to edit: "))
     print(SourceCode[LineNumber])
     Choice = EMPTY_STRING
@@ -103,9 +104,15 @@ def EditSourceCode(SourceCode):
             Choice = input("Enter your choice: ")
         if Choice == "E":
             SourceCode[LineNumber] = input("Enter the new line: ")
-        DisplaySourceCode(SourceCode)
-    return SourceCode
+    return SourceCode, AllSourceCode
 
+
+def UndoEditSourceCode(AllSourceCode):
+    undo_num = int(input("How many times you want to undo edits: "))
+    source_code_num = len(AllSourceCode) - undo_num - 1
+    SourceCode = AllSourceCode[source_code_num]
+    DisplaySourceCode(SourceCode)
+    return SourceCode
 
 def UpdateSymbolTable(SymbolTable, ThisLabel, LineNumber):
     if ThisLabel in SymbolTable:
@@ -227,7 +234,7 @@ def ConvertToBinary(DecimalNumber):
         Bit = str(Remainder)
         BinaryString = Bit + BinaryString
         DecimalNumber = DecimalNumber // 2
-    while len(BinaryString) < 4:
+    while len(BinaryString) < 3:
         BinaryString = '0' + BinaryString
     return BinaryString
 
@@ -252,21 +259,20 @@ def DisplayCurrentState(SourceCode, Memory, Registers):
     DisplayCode(SourceCode, Memory)
     print("*")
     print("*  PC: ", Registers[PC], " ACC: ", Registers[ACC], " TOS: ", Registers[TOS])
-    print("*  Status Register: ZNVC")
+    print("*  Status Register: ZNV")
     print("*                  ", ConvertToBinary(Registers[STATUS]))
     DisplayFrameDelimiter(-1)
 
 
 def SetFlags(Value, Registers):
     if Value == 0:
-        Registers[STATUS] = ConvertToDecimal("1000")
+        Registers[STATUS] = ConvertToDecimal("100")
     elif Value < 0:
-        Registers[STATUS] = ConvertToDecimal("0100")
+        Registers[STATUS] = ConvertToDecimal("010")
     elif Value > MAX_INT or Value < -(MAX_INT + 1):
-        Registers[STATUS] = ConvertToDecimal("0011")
+        Registers[STATUS] = ConvertToDecimal("001")
     else:
-        Registers[STATUS] = ConvertToDecimal("0000")
-
+        Registers[STATUS] = ConvertToDecimal("000")
     return Registers
 
 
@@ -296,7 +302,7 @@ def ExecuteLDAimm(Registers, Operand):
 def ExecuteADD(Memory, Registers, Address):
     Registers[ACC] = Registers[ACC] + Memory[Address].OperandValue
     Registers = SetFlags(Registers[ACC], Registers)
-    if Registers[STATUS] == ConvertToDecimal("0010"):
+    if Registers[STATUS] == ConvertToDecimal("001"):
         ReportRunTimeError("Overflow", Registers)
     return Registers
 
@@ -304,7 +310,7 @@ def ExecuteADD(Memory, Registers, Address):
 def ExecuteSUB(Memory, Registers, Address):
     Registers[ACC] = Registers[ACC] - Memory[Address].OperandValue
     Registers = SetFlags(Registers[ACC], Registers)
-    if Registers[STATUS] == ConvertToDecimal("0010"):
+    if Registers[STATUS] == ConvertToDecimal("001"):
         ReportRunTimeError("Overflow", Registers)
     return Registers
 
@@ -399,7 +405,6 @@ def Execute(SourceCode, Memory):
             DisplayCurrentState(SourceCode, Memory, Registers)
         else:
             OpCode = "HLT"
-        print(Registers)
     print("Execution terminated")
 
 
@@ -409,12 +414,16 @@ def AssemblerSimulator():
     SourceCode = ResetSourceCode(SourceCode)
     Memory = ResetMemory(Memory)
     Finished = False
+    AllSourceCode = []
+    save_count = 0
     while not Finished:
         DisplayMenu()
         MenuOption = GetMenuOption()
         if MenuOption == 'L':
             SourceCode = LoadFile(SourceCode)
             Memory = ResetMemory(Memory)
+            if save_count == 0:
+                AllSourceCode.append(SourceCode.copy())
         elif MenuOption == 'D':
             if SourceCode[0] == EMPTY_STRING:
                 print("Error Code 7")
@@ -424,8 +433,12 @@ def AssemblerSimulator():
             if SourceCode[0] == EMPTY_STRING:
                 print("Error Code 8")
             else:
-                SourceCode = EditSourceCode(SourceCode)
+                SourceCode, AllSourceCode = EditSourceCode(SourceCode, AllSourceCode)
+                AllSourceCode.append(SourceCode.copy())
                 Memory = ResetMemory(Memory)
+        elif MenuOption == 'U':
+            SourceCode = UndoEditSourceCode(AllSourceCode)
+            Memory = ResetMemory(Memory)
         elif MenuOption == 'A':
             if SourceCode[0] == EMPTY_STRING:
                 print("Error Code 9")
@@ -442,6 +455,7 @@ def AssemblerSimulator():
             Finished = True
         else:
             print("You did not choose a valid menu option. Try again")
+        print(AllSourceCode)
     print("You have chosen to exit the program")
 
 
